@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import securityjwt.User.CustomUserDetails;
+import securityjwt.User.INewAccountService;
 import securityjwt.User.User;
 import securityjwt.User.UserRepository;
 import securityjwt.User.UserService;
@@ -36,10 +37,9 @@ public class LodaRestController {
 	private JwtTokenProvider tokenProvider;
 	
 	@Autowired
-	private UserRepository userRepository;
+	private INewAccountService newAccountService;
 	
-	@Autowired
-	PasswordEncoder passwordEncoder;
+	
 	
 	@PostMapping("/login")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -69,13 +69,11 @@ public class LodaRestController {
 	
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SingupRequest singupRequest) {
-		if(userRepository.existsByUsername(singupRequest.getUsername())) {
+		if(newAccountService.existsByUsername(singupRequest.getUsername())) {
 			return ResponseEntity.status(401).body(new RandomStuff("Tài Khoản đã tồn tại"));
 		}
 		//create account
-		User myuser = new User(singupRequest.getUsername(),
-				passwordEncoder.encode(singupRequest.getPassword()));
-		userRepository.save(myuser);
+		newAccountService.save(singupRequest.getUsername(), singupRequest.getPassword());
 		return ResponseEntity.ok(new RandomStuff("Đăng ký thành công"));
 	}
 
