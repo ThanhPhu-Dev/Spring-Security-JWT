@@ -8,13 +8,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import securityjwt.CustommerNotFoundException;
+
 @Service
-public class UserService implements UserDetailsService {
+public class UserService implements UserDetailsService, INewAccountService, IResetPassword{
 
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	PasswordEncoder passwordEncoder;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) {
@@ -39,4 +45,42 @@ public class UserService implements UserDetailsService {
 		return new CustomUserDetails(user);
 	}
 
+	@Override
+	public Boolean existsByUsername(String username) {
+		return userRepository.existsByUsername(username);
+	}
+
+	@Override
+	public User save(String username, String password) {
+		return userRepository.save(new User(username,passwordEncoder.encode(password)));
+	}
+
+	@Override
+	@Transactional
+	public void updateResetPasswordToken(String token, String username) throws CustommerNotFoundException{
+		User user = userRepository.findByUsername(username);
+		if(user != null) {
+			user.setResetPasswordToken(token);
+			userRepository.save(user);
+		}else {
+			throw new CustommerNotFoundException("could not find any customer with username"+username);
+		}
+		
+	}
+
+	@Override
+	public User getByResetPasswordToken(String resetpasswordToken) {
+		return userRepository.findByResetPasswordToken(resetpasswordToken);
+	}
+
+	@Override
+	public void updatePassword(User user, String newpassword) {
+		String encodedPassword = passwordEncoder.encode(newpassword);
+		user.setPassword(encodedPassword);
+		user.setResetPasswordToken(null);
+		userRepository.save(user);
+		
+	}
+
+	
 }

@@ -26,7 +26,7 @@ public class App implements CommandLineRunner {
 		// Khi chương trình chạy
 		// Insert vào csdl một user.
 		User user = new User();
-		user.setUsername("loda");
+		user.setUsername("tphu2000@gmail.com");
 		user.setPassword(passwordEncoder.encode("loda"));
 		userRepository.save(user);
 		System.out.println(user);

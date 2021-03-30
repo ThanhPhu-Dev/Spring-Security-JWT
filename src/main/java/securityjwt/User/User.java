@@ -20,6 +20,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
     private String password;
+    @Column(name = "resetpasswordtoken", columnDefinition = "VARCHAR(45)")
+    private String resetPasswordToken;
+    
 	public User(String username, String password) {
 		super();
 		this.username = username;

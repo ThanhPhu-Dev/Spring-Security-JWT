@@ -53,7 +53,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.cors().and().csrf().disable().authorizeRequests()
 		
-		.antMatchers("/api/signup", "/api/login").permitAll()// Cho phép tất cả
+		.antMatchers( "/api/reset_password", "/api/signup", "/api/login", "/api/forgot_password").permitAll()// Cho phép tất cả
 																										// mọi người
 																										// truy cập vào
 																										// 2 địa chỉ này
