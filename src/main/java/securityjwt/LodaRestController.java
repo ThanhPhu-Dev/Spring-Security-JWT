@@ -3,6 +3,7 @@ package securityjwt;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,7 +42,7 @@ public class LodaRestController {
 	PasswordEncoder passwordEncoder;
 	
 	@PostMapping("/login")
-	public LoginResponse authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 		Authentication authentication = null;
 		String jwt=null;
 		try {
@@ -49,7 +50,7 @@ public class LodaRestController {
 			authentication = authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 		} catch (Exception e) {
-			System.err.println("Lổi sai pass");
+			return ResponseEntity.status(401).body(e.getMessage());
 		}
 		try {
 			// Nếu không xảy ra exception tức là thông tin hợp lệ
@@ -63,19 +64,19 @@ public class LodaRestController {
 		}
 
 		
-		return new LoginResponse(jwt);
+		return ResponseEntity.ok(new LoginResponse(jwt));
 	}
 	
 	@PostMapping("/signup")
-	public RandomStuff registerUser(@Valid @RequestBody SingupRequest singupRequest) {
+	public ResponseEntity<?> registerUser(@Valid @RequestBody SingupRequest singupRequest) {
 		if(userRepository.existsByUsername(singupRequest.getUsername())) {
-			return new RandomStuff("Error: Username is Already is use!");
+			return ResponseEntity.status(401).body(new RandomStuff("Tài Khoản đã tồn tại"));
 		}
 		//create account
 		User myuser = new User(singupRequest.getUsername(),
 				passwordEncoder.encode(singupRequest.getPassword()));
 		userRepository.save(myuser);
-		return new RandomStuff("Đăng ký thành công");
+		return ResponseEntity.ok(new RandomStuff("Đăng ký thành công"));
 	}
 
 	// Api /api/random yêu cầu phải xác thực mới có thể request
